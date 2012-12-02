@@ -20,34 +20,38 @@
 #  of or in connection with the use or performance of this software.
 ###############################################################################
 
-class EventStream(object):
-	"""The base type for all event detection providers."""
-	def __init__(self,sampleStream):
-		"""Initialise an event detector with an input iterator"""
+from . import eventstream
 
-		self.input = sampleStream
+class Sample(object):
+	def __init__(self, ind=0, time=0, x=0, y=0):
+		self.index = ind
+		self.time = time
+		self.x = x
+		self.y = y
+
+	def __str__(self):
+		return "(%d,%f,%d,%d)" % (self.index, self.time, self.x, self.y)
+
+	def __repr__(self):
+		return self.__str__()
+
+class SampleStream:
+	def __init__(self):
+		raise "SampleStream shouldn't be instantiated directly. Use FileSampleStream or ListSampleStream."
 
 	def __iter__(self):
 		return self
 
 	def next(self):
-		"""Event detectors should override the next method."""
 		raise StopIteration
 
-
-class DetectorEvent(object):
-	def __init__(self):
-		self.type = "none"
-
-
-class EFixation(DetectorEvent):
-	def __init__(self,center,length,start,end):
-		self.type = "fixation"
-		self.center = center
-		self.length = length
-		self.start = start
-		self.end = end
+class ListSampleStream:
+	def __init__(self,data):
+		self.data = data
 	
-	def __str__(self):
-		return "Fixation at (%d,%d) of %d samples, starting at sample %d" % (self.center.x,self.center.y,self.length,self.start.index) 
+	def next(self):
+		if len(self.data) == 0:
+			raise StopIteration
+
+		return self.data.pop(0)
 

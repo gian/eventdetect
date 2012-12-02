@@ -20,34 +20,47 @@
 #  of or in connection with the use or performance of this software.
 ###############################################################################
 
-class EventStream(object):
-	"""The base type for all event detection providers."""
-	def __init__(self,sampleStream):
-		"""Initialise an event detector with an input iterator"""
+from detect.sample import Sample
+from detect.sample import ListSampleStream
 
-		self.input = sampleStream
+from detect.dispersion import *
 
-	def __iter__(self):
-		return self
+def lineto (x1,y1,x2,y2,offset,samples,timeInterval):
+	l = []
+	t = (float(timeInterval) / float(samples))
+	xv = (x2 - x1) / float(samples)
+	yv = (y2 - y1) / float(samples)
 
-	def next(self):
-		"""Event detectors should override the next method."""
-		raise StopIteration
+	p = Sample(offset,timeInterval * offset,x1,y1)
+	l.append(p)
 
-
-class DetectorEvent(object):
-	def __init__(self):
-		self.type = "none"
-
-
-class EFixation(DetectorEvent):
-	def __init__(self,center,length,start,end):
-		self.type = "fixation"
-		self.center = center
-		self.length = length
-		self.start = start
-		self.end = end
+	for i in range(0,samples):
+		p = Sample(i+offset,timeInterval * (offset + i), p.x+xv, p.y+yv)
+		l.append(p)
 	
-	def __str__(self):
-		return "Fixation at (%d,%d) of %d samples, starting at sample %d" % (self.center.x,self.center.y,self.length,self.start.index) 
+	return l
+
+def fixate (x,y,offset,samples,timeInterval):
+	l = []
+
+	for i in range(0,samples):
+		p = Sample(i+offset,timeInterval * (offset + i), x, y)
+		l.append(p)
+	
+	return l
+
+testPath = fixate(250,250,0,49,0.001)
+testPath.extend(lineto(250,250,550,550,50,100,0.001))
+testPath.extend(fixate(550,550,151,99,0.001))
+testPath.extend(lineto(550,550,350,150,251,99,0.001))
+testPath.extend(fixate(350,150,251,49,0.001))
+
+print "============= I-DT test ==============="
+
+stream = ListSampleStream(testPath)
+d = Dispersion(stream, 3, 5)
+
+for i in d:
+	print i
+
 

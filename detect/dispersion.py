@@ -21,7 +21,102 @@
 ###############################################################################
 
 from . import eventstream
+from eventstream import EventStream
+from eventstream import EFixation
 
-class Dispersion (EventStream):
+class Dispersion(EventStream):
+	"""Simple dispersion-based algorithm. 
+	   
+	   This is based on I-DT of Salvucci and Goldberg (2000).
+
+	   Parameters:
+		windowSize: the size of the window (in samples).
+		threshold (pixels) the radius in which to consider a fixation.
+	"""
+	def __init__(self, sampleStream, windowSize, threshold):
+		super(Dispersion, self).__init__(sampleStream)
+		self.windowSize = windowSize
+		self.threshold = threshold
+		self.window = []
+
+	def fillWindow(self):
+		try:
+			while len(self.window) < self.windowSize:
+				self.window.append(self.input.next())
+		except StopIteration:
+			return
+	
+	def dispersion(self):
+		if len(self.window) == 0:
+			raise ValueError
+
+		minx = maxx = self.window[0].x
+		miny = maxy = self.window[0].y
+
+		for p in self.window:
+			minx = min(minx,p.x)
+			maxx = max(maxx,p.x)
+			miny = min(miny,p.y)
+			maxy = max(maxy,p.y)
+
+		return maxx - minx + maxy - miny
+
+	def centroid(self):
+		xs = 0
+		ys = 0
+		
+		for p in self.window:
+			xs = xs + p.x
+			ys = ys + p.y
+
+		xc = round(xs / float(len(self.window)))
+		yc = round(ys / float(len(self.window)))
+
+		pc = self.window[0]
+		pc.x = xc
+		pc.y = yc
+
+		return pc
+
 	def next(self):
+		# Fill the window with samples.
+		self.fillWindow()
+
+		if len(self.window) == 0:
+			raise StopIteration
+
+		d = self.dispersion()
+
+		if d <= self.threshold:
+			# We are in a fixation, but need to grow it
+			# until we move above the threshold.
+
+			start = self.window[0]
+
+			while d <= self.threshold:
+				try:
+					self.window.append(self.input.next())
+				except StopIteration:
+					break
+
+				d = self.dispersion()
+			
+				#print ("Window (%f): %s" % (d,str(self.window)))
+
+			end = self.window.pop()
+			p = self.centroid()
+
+			length = len(self.window)
+			self.window = []
+
+			return EFixation(p, length, start, end)
+
+		else:
+			# Remove the first element
+			self.window.pop(0)
+			# Recurse.
+			return self.next()
+
+
+
 		
