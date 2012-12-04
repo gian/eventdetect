@@ -35,7 +35,7 @@ class Sample(object):
 	def __repr__(self):
 		return self.__str__()
 
-class SampleStream:
+class SampleStream(object):
 	def __init__(self):
 		raise "SampleStream shouldn't be instantiated directly. Use FileSampleStream or ListSampleStream."
 
@@ -45,13 +45,14 @@ class SampleStream:
 	def next(self):
 		raise StopIteration
 
-class ListSampleStream:
+class ListSampleStream(SampleStream):
 	def __init__(self,data):
-		self.data = data
+		self.data = list(data)
 	
 	def next(self):
 		if len(self.data) == 0:
 			raise StopIteration
 
 		return self.data.pop(0)
+
 

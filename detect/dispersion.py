@@ -61,22 +61,6 @@ class Dispersion(EventStream):
 
 		return maxx - minx + maxy - miny
 
-	def centroid(self):
-		xs = 0
-		ys = 0
-		
-		for p in self.window:
-			xs = xs + p.x
-			ys = ys + p.y
-
-		xc = round(xs / float(len(self.window)))
-		yc = round(ys / float(len(self.window)))
-
-		pc = self.window[0]
-		pc.x = xc
-		pc.y = yc
-
-		return pc
 
 	def next(self):
 		# Fill the window with samples.
@@ -104,7 +88,7 @@ class Dispersion(EventStream):
 				#print ("Window (%f): %s" % (d,str(self.window)))
 
 			end = self.window.pop()
-			p = self.centroid()
+			p = self.centroid(self.window)
 
 			length = len(self.window)
 			self.window = []

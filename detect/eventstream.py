@@ -34,6 +34,23 @@ class EventStream(object):
 		"""Event detectors should override the next method."""
 		raise StopIteration
 
+	def centroid(self,window):
+		"""Compute a centroid for a window of points."""
+		xs = 0
+		ys = 0
+		
+		for p in window:
+			xs = xs + p.x
+			ys = ys + p.y
+
+		xc = round(xs / float(len(window)))
+		yc = round(ys / float(len(window)))
+
+		pc = window[0]
+		pc.x = xc
+		pc.y = yc
+
+		return pc
 
 class DetectorEvent(object):
 	def __init__(self):
