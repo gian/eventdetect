@@ -68,3 +68,14 @@ class EFixation(DetectorEvent):
 	def __str__(self):
 		return "Fixation at (%d,%d) of %d samples, starting at sample %d" % (self.center.x,self.center.y,self.length,self.start.index) 
 
+class ESaccade(DetectorEvent):
+	def __init__(self,length,start,end):
+		self.type = "saccade"
+		self.length = length
+		self.start = start
+		self.end = end
+	
+	def __str__(self):
+		return "Saccade of %d samples, (%d,%d) -> (%d,%d)" % (self.length,self.start.x,self.start.y,self.end.x,self.end.y) 
+
+
