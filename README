@@ -1,5 +1,5 @@
-This repository contains a set of event detection algorithms for streams of
-eye movement data, implemented in Python.
+This repository contains a set of event detection algorithms for streams of human data (mostly
+eye movement data), implemented in Python.
 
 Documentation for individual algorithms is available in the doc/ directory.
 
