@@ -102,7 +102,7 @@ class HMM(EventStream):
 
 	# Run the Viterbi algorithm to decode the HMM.
 	# Takes a list of 'observations' (read: velocities)
-	# Original implementation from:
+	# This implementation started life as:
 	# http://en.wikipedia.org/wiki/Viterbi_algorithm
 	# Heavily modified to use log probabilities.
 	def viterbi(self, obs):
@@ -134,17 +134,20 @@ class HMM(EventStream):
 
 
 	def next(self):
+		# Check if there is pre-computed output that can be returned.
 		if len(self.output) > 0:
 			return self.output.pop(0)
 
+		# 'exhausted' is used to signal there is no more output,
+		# and to prevent it from trying to recompute more.
 		if self.exhausted:
 			raise StopIteration
 
+		# Calls to 'next' should only reach this point *once*.
 		obs = [] # Observations
-		inp = []
+		inp = [] # Input buffer
 
 		states = ('fix','sacc')
-
 		
 		for curr in self.input:
 			v = self.intersampleVelocity(self.prev,curr)
@@ -178,7 +181,7 @@ class HMM(EventStream):
 				event = [inp[i]]
 				inFix = False
 
-		# Remaining samples?
+		# Remaining samples need to be parsed out into an event.
 		if len(event) > 0:
 			if not inFix:
 				e = ESaccade(len(event),event[0],event[len(event)-1])
