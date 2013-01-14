@@ -27,7 +27,7 @@ from eventstream import EFixation
 class AOI(EventStream):
 	"""Areas of Interest event detection. 
 	   
-	   This is based on I-DT of Salvucci and Goldberg (2000).
+	   This is based on I-AOI of Salvucci and Goldberg (2000).
 
 	   Parameters:
 		threshold: (samples) the duration above which to consider a fixation.
