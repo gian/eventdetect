@@ -26,6 +26,8 @@ from detect.sample import ListSampleStream
 from detect.dispersion import *
 from detect.velocity import *
 from detect.hmm import *
+from detect.prefix import *
+from detect.aoi import *
 
 def lineto (x1,y1,x2,y2,offset,samples,timeInterval):
 	l = []
@@ -94,5 +96,40 @@ h2 = HMM(stream, 0.01, 100.0, 4500.0, 100.0, 0.95, 0.05, 0.95, 0.05)
 for i in h2:
 	print i
 
+print "============= Prefix test ==============="
+testPathB = fixate(500,500,0,3,0.001)
+testPathB.extend(lineto(500,500,400,400,4,4,0.001))
+testPathB.extend(fixate(400,400,9,4,0.001))
+testPathB.extend(lineto(400,400,300,300,13,4,0.001))
+
+print " * Test 1:"
+
+stream = ListSampleStream(testPathB)
+h = Prefix(stream, 30)
+
+for i in h:
+	print i
+
+print " * Test 2:"
+
+stream = ListSampleStream(testPath)
+h2 = Prefix(stream, 30)
+
+for i in h2:
+	print i
+
+print "============= I-AOI test ==============="
+testPathB = fixate(500,500,0,3,0.001)
+testPathB.extend(lineto(500,500,400,400,4,4,0.001))
+testPathB.extend(fixate(400,400,9,4,0.001))
+testPathB.extend(lineto(400,400,300,300,13,4,0.001))
+
+print " * Test 1:"
+
+stream = ListSampleStream(testPathB)
+h = AOI(stream, 3, [(490,490,510,510),(390,390,410,410)])
+
+for i in h:
+	print i
 
 
