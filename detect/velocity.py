@@ -64,7 +64,6 @@ class Velocity(EventStream):
 
 		for curr in self.input:
 			v = self.intersampleVelocity(self.prev,curr)
-			
 			if v < self.threshold:
 				fixation.append(self.prev)
 				self.prev = curr

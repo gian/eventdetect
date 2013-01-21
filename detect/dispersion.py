@@ -97,7 +97,7 @@ class Dispersion(EventStream):
 
 		else:
 			# Remove the first element
-			self.window.pop(0)
+			self.window = self.window[1:]
 			# Recurse.
 			return self.next()
 

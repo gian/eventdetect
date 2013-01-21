@@ -55,4 +55,25 @@ class ListSampleStream(SampleStream):
 
 		return self.data.pop(0)
 
+class FileSampleStream(SampleStream):
+	def __init__(self,filename):
+		self.handle = open(filename, 'r')
+		self.handle.readline() # skip header
+		self.index = 0
+
+	def next(self):
+		line = self.handle.readline()
+		if line == '':
+			raise StopIteration
+
+		f = line.split('\t')
+
+		self.index = self.index + 1
+
+		t = float(f[0]) / 1000000.0 # Microseconds to seconds
+
+		s = Sample(self.index, int(f[0]), int(f[1]), int(f[2]))
+		s.eventType = int(f[3][:-1])
+
+		return s
 

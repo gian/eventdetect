@@ -151,7 +151,6 @@ class HMM(EventStream):
 		
 		for curr in self.input:
 			v = self.intersampleVelocity(self.prev,curr)
-
 			obs.append(v)
 			inp.append(self.prev)
 			self.prev = curr

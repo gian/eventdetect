@@ -52,8 +52,8 @@ class WeightedFilter(EventStream):
 
 		if dt <= 0:
 			# We can't work with a zero or negative time interval, so we
-			# return an arbitrary velocity above the threshold.
-			return 10000.0 + self.threshold
+			# return an arbitrary large velocity
+			return 10000.0
 
 		d = math.sqrt(dx * dx + dy * dy)
 

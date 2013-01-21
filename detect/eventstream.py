@@ -38,6 +38,9 @@ class EventStream(object):
 		"""Compute a centroid for a window of points."""
 		xs = 0
 		ys = 0
+
+		if len(window) == 0:
+			raise StopIteration
 		
 		for p in window:
 			xs = xs + p.x
