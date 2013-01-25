@@ -30,14 +30,17 @@ from detect.prefix import *
 from detect.aoi import *
 from detect.movingaverage import *
 from detect.srr import *
+from detect.intersamplevelocity import *
+from detect.sgfilter import *
+from detect.blinkfilter import *
 
-print "============= I-VT test ==============="
+print "============= I-VT MovingAverage test ==============="
 
 stream = FileSampleStream('testData/UH27_img_vy_labelled_MN.txt')
 
-fstream = MovingAverageFilter(stream,9)
+fstream = IntersampleVelocity(MovingAverageFilter(BlinkFilter(stream),9))
 
-idt = Velocity(fstream, 0.005)
+idt = Velocity(fstream, 0.004)
 
 fixations = []
 
@@ -45,7 +48,7 @@ for i in idt:
 	print i
 	fixations.append(i)
 
-verifStream = FileSampleStream('testData/UH27_img_vy_labelled_MN.txt')
+verifStream = BlinkFilter(FileSampleStream('testData/UH27_img_vy_labelled_MN.txt'))
 
 taggedEvents = []
 cfix = []
@@ -81,4 +84,56 @@ ePct = errorSamples / float(len(eventType))
 
 print "Matched Samples: " + str(matchedSamples) + " (" + str(mPct * 100) + "%)"
 print "Error Samples: " + str(errorSamples) + " (" + str(ePct * 100) + "%)"
+
+print "============= I-VT SG test ==============="
+
+stream = FileSampleStream('testData/UH27_img_vy_labelled_MN.txt')
+
+fstream = SGFilter(IntersampleVelocity(BlinkFilter(stream)), 21, 2)
+
+idt = Velocity(fstream, 0.005)
+
+fixations = []
+
+for i in idt: 
+	print i
+	fixations.append(i)
+
+verifStream = BlinkFilter(FileSampleStream('testData/UH27_img_vy_labelled_MN.txt'))
+
+taggedEvents = []
+cfix = []
+eventType = []
+for i in verifStream:
+	if i.eventType == 1:
+		cfix.append(i)
+		eventType.append(1)
+	else:
+		eventType.append(0)
+		if len(cfix) == 0:
+			continue
+		print ("Fixation of length: " + str(len(cfix)) + " starting at sample " + str(cfix[0].index))
+		p = idt.centroid(cfix)
+
+		f = EFixation(p, len(cfix), cfix[0], cfix[-1])
+		taggedEvents.append(f)
+		cfix = []
+
+matchedSamples = 0
+errorSamples = 0
+
+for f in fixations:
+	s = f.start.index
+	for i in range(s,s+f.length):
+		if eventType[i] == 1:
+			matchedSamples = matchedSamples + 1
+		else:
+			errorSamples = errorSamples + 1
+
+mPct = matchedSamples / float(len(eventType))
+ePct = errorSamples / float(len(eventType))
+
+print "Matched Samples: " + str(matchedSamples) + " (" + str(mPct * 100) + "%)"
+print "Error Samples: " + str(errorSamples) + " (" + str(ePct * 100) + "%)"
+
 
