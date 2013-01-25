@@ -23,8 +23,10 @@
 from . import eventstream
 from eventstream import EventStream
 from eventstream import EFixation
+from eventstream import ESaccade
 
 import math
+import random
 
 class EngbertKliegl(EventStream):
 	"""
@@ -50,6 +52,13 @@ class EngbertKliegl(EventStream):
 		self.threshold = threshold
 		self.windowSize = 5
 		self.window = []
+		self.xRes = [] # x-coordinate reservoir
+		self.yRes = [] # y-coordinate reservoir
+		self.resSize = 50
+		self.buf = [] # Buffer for events
+		self.inFix = False
+		self.inSacc = False
+		random.seed()
 
 	def fillWindow(self):
 		try:
@@ -86,18 +95,75 @@ class EngbertKliegl(EventStream):
 
 		return w[2]
 
+	# Estimate a median by a reservoir-sampling method
+	def median(self, res):
+		return sum(res) / len(res)
+
+	def medianEstimatorX(self,v):
+		if len(self.xRes) < self.resSize:
+			self.xRes.append(v*v)
+		#else:
+		#	p = random.randint(0,len(self.xRes)-1)
+		#	self.xRes[p] = v*v
+
+		return self.median(self.xRes)
+	
+	def medianEstimatorY(self,v):
+		if len(self.yRes) < self.resSize:
+			self.yRes.append(v*v)
+		#else:
+		#	p = random.randint(0,len(self.yRes)-1)
+		#	self.yRes[p] = v*v
+
+		return self.median(self.yRes)
+
 	def next(self):
 		self.fillWindow()
 
-		if len(self.window) == 0:
+		if len(self.window) <= 3:
 			raise StopIteration
 
 		v = self.windowVelocity()
 
-		print "Velocity: " + str(v.vx) + " / " + str(v.vy)
+		# print "Velocity: " + str(v.vx) + " / " + str(v.vy)
+
+		mx = self.medianEstimatorX(v.vx)
+		my = self.medianEstimatorY(v.vy)
+		
+		# print "Median: " + str(mx) + " / " + str(my)
+
+		sdx = (v.vx * v.vx) - (mx * mx)
+		sdy = (v.vy * v.vy) - (my * my)
+
+		# print "Std.Dev: " + str(sdx * self.threshold) + " / " + str(sdy * self.threshold)
+
+		samp = self.window[2]
+
+		r = None
+
+		if v.vx >= sdx * self.threshold and v.vy >= sdy * self.threshold:
+			self.inSacc = True
+
+			if self.inFix and len(self.buf) > 1:
+				self.inFix = False
+				c = self.centroid(self.window)
+				r = EFixation(c, len(self.buf), self.buf[0], self.buf[-1])
+				self.buf = []
+
+			self.buf.append(samp)
+		else:
+			self.inFix = True
+
+			if self.inSacc:
+				self.inSacc = False
+				if len(self.buf) > 3:
+					r = ESaccade(len(self.buf), self.buf[0], self.buf[-1])
+				self.buf = []
 
 		self.window = self.window[1:]
-
-		return None
-
+		
+		if r != None:
+			return r
+		else:
+			return self.next()
 

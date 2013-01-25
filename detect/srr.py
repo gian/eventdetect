@@ -74,9 +74,6 @@ class SRR(EventStream):
 			dy = curr.y - prev.y
 			dt = curr.time - prev.time
 
-			if dt <= 0:
-				dt = 1
-
 			dsum = dsum + math.sqrt(dx * dx + dy * dy)
 			interval = interval + dt
 
@@ -100,7 +97,7 @@ class SRR(EventStream):
 		if dt == 0.0:
 			dt = 1.0
 
-		return dv / float(dt)
+		return dv / dt
 
 
 	def next(self):

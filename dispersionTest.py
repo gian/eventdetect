@@ -30,18 +30,17 @@ from detect.prefix import *
 from detect.aoi import *
 from detect.movingaverage import *
 from detect.srr import *
-from detect.engbertkliegl import *
 
-print "============= EngbertKliegl test ==============="
+print "============= I-DT test ==============="
 
 stream = FileSampleStream('testData/UH27_img_vy_labelled_MN.txt')
 
-d = EngbertKliegl(stream, 3.0)
+idt = Dispersion(stream, 15, 15)
 
 fixations = []
 
-for i in d:
-	print str(i)
+for i in idt: 
+	print i
 	fixations.append(i)
 
 verifStream = FileSampleStream('testData/UH27_img_vy_labelled_MN.txt')
@@ -58,72 +57,26 @@ for i in verifStream:
 		if len(cfix) == 0:
 			continue
 		print ("Fixation of length: " + str(len(cfix)) + " starting at sample " + str(cfix[0].index))
-		p = d.centroid(cfix)
+		p = idt.centroid(cfix)
 
 		f = EFixation(p, len(cfix), cfix[0], cfix[-1])
 		taggedEvents.append(f)
 		cfix = []
 
-verifStream = FileSampleStream('testData/UH27_img_vy_labelled_MN.txt')
-
-saccEvents = []
-csacc = []
-saccEventType = []
-for i in verifStream:
-	if i.eventType == 2:
-		csacc.append(i)
-		saccEventType.append(1)
-	else:
-		saccEventType.append(0)
-		if len(csacc) == 0:
-			continue
-		print ("Saccade of length: " + str(len(csacc)) + " starting at sample " + str(csacc[0].index))
-
-		f = ESaccade(len(csacc), csacc[0], csacc[-1])
-		saccEvents.append(f)
-		csacc = []
-
-
 matchedSamples = 0
 errorSamples = 0
-fixCount = 0
+
 for f in fixations:
-	if f.type != 'fixation':
-		continue
 	s = f.start.index
 	for i in range(s,s+f.length):
-		fixCount = fixCount + 1
 		if eventType[i] == 1:
 			matchedSamples = matchedSamples + 1
 		else:
 			errorSamples = errorSamples + 1
 
-mPct = matchedSamples / float(fixCount)
-ePct = errorSamples / float(fixCount)
+mPct = matchedSamples / float(len(eventType))
+ePct = errorSamples / float(len(eventType))
 
-print "Fixations:"
 print "Matched Samples: " + str(matchedSamples) + " (" + str(mPct * 100) + "%)"
 print "Error Samples: " + str(errorSamples) + " (" + str(ePct * 100) + "%)"
-
-matchedSamples = 0
-errorSamples = 0
-saccCount = 0
-
-for f in fixations:
-	if f.type != 'saccade':
-		continue
-	s = f.start.index
-	for i in range(s,s+f.length):
-		if saccEventType[i] == 1:
-			saccCount = saccCount + 1
-			matchedSamples = matchedSamples + 1
-		else:
-			errorSamples = errorSamples + 1
-
-mPct = matchedSamples / float(saccCount)
-ePct = errorSamples / float(saccCount)
-print "Saccades:"
-print "Matched Samples: " + str(matchedSamples) + " (" + str(mPct * 100) + "%)"
-print "Error Samples: " + str(errorSamples) + " (" + str(ePct * 100) + "%)"
-
 

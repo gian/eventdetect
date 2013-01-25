@@ -30,21 +30,23 @@ from detect.prefix import *
 from detect.aoi import *
 from detect.movingaverage import *
 from detect.srr import *
-from detect.engbertkliegl import *
+from detect.blinkfilter import *
 
-print "============= EngbertKliegl test ==============="
+print "============= SRR test ==============="
 
 stream = FileSampleStream('testData/UH27_img_vy_labelled_MN.txt')
 
-d = EngbertKliegl(stream, 3.0)
+bstream = BlinkFilter(stream)
+
+d = SRR(bstream, 9, 0.0001, 0.00000001)
 
 fixations = []
 
-for i in d:
-	print str(i)
+for i in d: 
+	print i
 	fixations.append(i)
 
-verifStream = FileSampleStream('testData/UH27_img_vy_labelled_MN.txt')
+verifStream = BlinkFilter(FileSampleStream('testData/UH27_img_vy_labelled_MN.txt'))
 
 taggedEvents = []
 cfix = []
@@ -125,5 +127,6 @@ ePct = errorSamples / float(saccCount)
 print "Saccades:"
 print "Matched Samples: " + str(matchedSamples) + " (" + str(mPct * 100) + "%)"
 print "Error Samples: " + str(errorSamples) + " (" + str(ePct * 100) + "%)"
+
 
 
