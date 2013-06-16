@@ -1,5 +1,9 @@
 This repository contains a set of event detection algorithms for streams of human data (mostly
 eye movement data), implemented in Python.
 
-Documentation for individual algorithms is available in the doc/ directory.
+Documentation for each algorithm is included in comments in the files in the detect/
+directory.
+
+The 'test.py' file is the best one to run to get an idea of the way to instantiate the
+library and chain together filters and detection algorithms.
 
