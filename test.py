@@ -26,10 +26,10 @@ from detect.sample import ListSampleStream
 from detect.dispersion import *
 from detect.velocity import *
 from detect.hmm import *
-from detect.prefix import *
 from detect.aoi import *
 from detect.movingaverage import *
 from detect.srr import *
+from detect.intersamplevelocity import *
 
 def lineto (x1,y1,x2,y2,offset,samples,timeInterval):
 	l = []
@@ -139,7 +139,7 @@ for i in d:
 
 print "============= I-VT test ==============="
 stream = ListSampleStream(testPath)
-v = Velocity(stream, 5)
+v = Velocity(IntersampleVelocity(stream), 5)
 
 for i in v:
 	print i

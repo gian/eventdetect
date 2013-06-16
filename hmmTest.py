@@ -26,7 +26,6 @@ from detect.sample import FileSampleStream
 from detect.dispersion import *
 from detect.velocity import *
 from detect.hmm import *
-from detect.prefix import *
 from detect.aoi import *
 from detect.movingaverage import *
 from detect.srr import *

@@ -49,7 +49,6 @@ class IntersampleVelocity(EventStream):
 
 		return d / float(dt)
 		
-
 	def next(self):
 		curr = self.input.next()
 
