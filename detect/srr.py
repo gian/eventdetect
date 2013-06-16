@@ -28,24 +28,25 @@ import math
 
 class SRR(EventStream):
 	"""A velocity and acceleration threshold-based algorithm,
-		 based on the descriptions given in the SR Research EyeLink manual (1.3.0)
-		 and default parameters given by Holmqvist et al. in 
-		 Eye Tracking: A comprehensive guide to methods and measures (2011).
+ 	   based on the descriptions given in the SR Research EyeLink manual (1.3.0)
+	   and default parameters given by Holmqvist et al. in 
+	   Eye Tracking: A comprehensive guide to methods and measures (2011).
 		 
-		 The EyeLink algorithm parameters are usually given in terms of
-		 degrees/s and degrees/s^2.	Our inputs are consistently based upon
-		 pixels/s and pixels/s^2.	The DegreesOfVision class contains translation
-		 calculators for converting between these.
+	   The EyeLink algorithm parameters are usually given in terms of
+	   degrees/s and degrees/s^2.	Our inputs are consistently based upon
+	   pixels/s and pixels/s^2.	The DegreesOfVision class contains translation
+	   calculators for converting between these.
 
-		 This algorithm by default does no filtering of input streams.	Use one of the other
-		 filter modules to provide custom filtering behaviour prior to applying this event
-		 detector.
+	   This algorithm by default does no filtering of input streams.
+	   Use one of the other filter modules to provide custom filtering behaviour 
+	   prior to applying this event detector.
 
-		 Parameters:
+	   Parameters:
 		windowSize: the size of the window (in samples).
 		velThresh (pixels/s) The velocity above which to detect a saccade.
-		accelThresh (pixels/s^2) The acceleration threshold above which to detect a saccade.
-								onsetDelay The minimum number of samples a saccade signal must be on or off for to trigger onset or offset.
+		accelThresh (pixels/s^2) The acceleration threshold at which to detect saccades
+		onsetDelay The minimum number of samples a saccade signal must be on or off
+		   for to trigger onset or offset.
 	"""
 	def __init__(self, sampleStream, windowSize, velThresh, accelThresh, onsetDelay):
 		super(SRR, self).__init__(sampleStream)

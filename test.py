@@ -32,6 +32,7 @@ from detect.srr import *
 from detect.intersamplevelocity import *
 from detect.engbertkliegl import *
 from detect.noisefilter import *
+from detect.smeetshooge import *
 
 def lineto (x1,y1,x2,y2,offset,samples,timeInterval):
 	l = []
@@ -243,5 +244,19 @@ h = EngbertKliegl(stream, 10)
 
 for i in h:
 	print i
+
+print "============= SmeetsHooge test ============"
+
+testPathB = fixate(500,500,0,10,0.001)
+testPathB.extend(saccto(500,500,400,400,11,5,0.001))
+testPathB.extend(fixate(400,400,17,8,0.001))
+testPathB.extend(saccto(400,400,300,300,26,10,0.001))
+
+stream = MovingAverageFilter(ListSampleStream(testPathB),2)
+h = SmeetsHooge(stream, 10000, 3, 3)
+
+for i in h:
+	print i
+
 
 
