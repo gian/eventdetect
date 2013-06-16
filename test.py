@@ -220,9 +220,15 @@ for i in h:
 
 print "============= SRR test ==============="
 
-path = saccto(100,100,500,500,0, 10, 0.001)
+testPathB = fixate(500,500,0,4,0.001)
+testPathB.extend(saccto(500,500,400,400,5,4,0.001))
+testPathB.extend(fixate(400,400,10,4,0.001))
+testPathB.extend(saccto(400,400,300,300,14,4,0.001))
 
-for i in path:
+stream = MovingAverageFilter(NoiseFilter(ListSampleStream(testPathB), 0.2),3)
+h = SRR(stream, 12, 100, 1000, 2)
+
+for i in h:
 	print i
 
 print "============= EngbertKliegl test ============"
