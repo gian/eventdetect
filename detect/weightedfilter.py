@@ -37,7 +37,7 @@ class WeightedFilter(EventStream):
 	    	tapWeights (list of floats) length determintes how many taps should be used.
 	"""
 	def __init__(self, sampleStream, tapWeights):
-		super(Velocity, self).__init__(sampleStream)
+		super(WeightedFilter, self).__init__(sampleStream)
 		self.tapWeights = self.normalize(tapWeights)
 		self.window = []
 

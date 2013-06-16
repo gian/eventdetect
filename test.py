@@ -30,6 +30,8 @@ from detect.aoi import *
 from detect.movingaverage import *
 from detect.srr import *
 from detect.intersamplevelocity import *
+from detect.engbertkliegl import *
+from detect.noisefilter import *
 
 def lineto (x1,y1,x2,y2,offset,samples,timeInterval):
 	l = []
@@ -221,6 +223,19 @@ print "============= SRR test ==============="
 path = saccto(100,100,500,500,0, 10, 0.001)
 
 for i in path:
+	print i
+
+print "============= EngbertKliegl test ============"
+
+testPathB = fixate(500,500,0,4,0.001)
+testPathB.extend(saccto(500,500,400,400,5,4,0.001))
+testPathB.extend(fixate(400,400,10,4,0.001))
+testPathB.extend(saccto(400,400,300,300,14,4,0.001))
+
+stream = NoiseFilter(ListSampleStream(testPathB), 0.1)
+h = EngbertKliegl(stream, 10)
+
+for i in h:
 	print i
 
 
