@@ -27,6 +27,7 @@ from eventstream import ESaccade
 
 import math
 import random
+import numpy as np
 
 class EngbertKliegl(EventStream):
 	"""
@@ -90,14 +91,15 @@ class EngbertKliegl(EventStream):
 		if dt <= 0:
 			dt = 1
 
-		w[2].vx = xsum / float(6 * dt)
+		w[2].vx = xsum / float(6 * dt)    # average volocity over 6 samples
 		w[2].vy = ysum / float(6 * dt)
 
 		return w[2]
 
-	# Estimate a median by a reservoir-sampling method
+	# Estimate a median by a reservoir-sampling method  ???????? isnt' that the mean?
 	def median(self, res):
-		return sum(res) / len(res)
+		# return sum(res) / len(res)
+		return np.median(res)
 
 	def medianEstimatorX(self,v):
 		if len(self.xRes) < self.resSize:
@@ -132,8 +134,10 @@ class EngbertKliegl(EventStream):
 		
 		# print "Median: " + str(mx) + " / " + str(my)
 
-		sdx = (v.vx * v.vx) - (mx * mx)
-		sdy = (v.vy * v.vy) - (my * my)
+		# sdx = (v.vx * v.vx) - (mx * mx)
+		sdx = (v.vx * v.vx) - mx
+		# sdy = (v.vy * v.vy) - (my * my)
+		sdy = (v.vy * v.vy) - my
 
 		# print "Std.Dev: " + str(sdx * self.threshold) + " / " + str(sdy * self.threshold)
 
@@ -141,6 +145,12 @@ class EngbertKliegl(EventStream):
 
 		r = None
 
+		print "x"
+		print v.vx
+		print sdx
+		print "y"
+		print v.vy
+		print sdy
 		if v.vx >= sdx * self.threshold and v.vy >= sdy * self.threshold:
 			self.inSacc = True
 
