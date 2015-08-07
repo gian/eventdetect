@@ -25,6 +25,7 @@ from eventstream import EventStream
 from eventstream import EFixation
 from eventstream import ESaccade
 import math
+import numpy as np
 
 class SmeetsHooge(EventStream):
 	"""A velocity threshold-based algorithm, based on "Nature of Variability
@@ -115,6 +116,7 @@ class SmeetsHooge(EventStream):
 
 	def avgVelocity(self, start, end):
 		""" Computes average velocity in a range. """
+		v_1 = []
 		prev = self.window[start]
 
 		vsum = 0
@@ -139,10 +141,19 @@ class SmeetsHooge(EventStream):
 			vsum += v
 			interval += dt
 
+			v_1.append(v)
+		
+		SD = np.std(np.array(v_1))  # compute standard deviation of velocity in the window
+
 		if interval == 0:
-		  return 0.0
-	
-		return vsum / float(interval)
+		  return {'avg':0, 'SD':0}
+
+		avg = vsum / (end-start-1)   
+		# seems like average velocity is calculated weird before.... 
+		# should either be as wrote here avg = sum(d)/sum(interval), sum(v)/sum(interval) devides interval twice....
+		# return vsum / float(interval)
+
+		return {'avg': avg, 'SD': SD}
 
 	def markSegments(self):
 		""" Expands a previously-marked set by computing baselines. """
@@ -158,13 +169,22 @@ class SmeetsHooge(EventStream):
 					inSaccade = False
 					continue
 				else:
-					baseline = self.avgVelocity(i - (self.windowSize + self.windowOffset), i - self.windowOffset)
+					averageVelocity = self.avgVelocity(i - (self.windowSize + self.windowOffset), i - self.windowOffset)
+					# baseline = self.avgVelocity(i - (self.windowSize + self.windowOffset), i - self.windowOffset)
+
+					avg = averageVelocity['avg']
+					SD = averageVelocity['SD']
+				
 				# Seek back to the start of the saccade onset
 				for j in range(i - self.windowOffset, i):
-					if self.velocities[j] >= 3 * baseline:
+					if self.velocities[j] >= 3 * SD + avg:
+					# if self.velocities[j] >= 3 * baseline:  baseline was the "incorrect" average velocity, according to the paper, the velocity should exceed mean + 3SD
+
 						self.marker[j] = 1
+
 					else:
 						self.marker[j] = 0
+
 				# Seek forward to the end of the saccade
 				k = i
 				while self.marker[k] == 0:
@@ -173,7 +193,7 @@ class SmeetsHooge(EventStream):
 				if maxOff > len(self.window) - 1:
 					maxOff = len(self.window) - 1
 				for l in range(k, maxOff):
-					if self.velocities[l] >= 3 * baseline:
+					if self.velocities[l] >= 3 * SD +avg:
 						self.marker[l] = 1
 					else:
 						self.marker[l] = 0
@@ -218,8 +238,6 @@ class SmeetsHooge(EventStream):
 			self.events.append(e)
 			return
 
-		# TODO: Should reject saccades that don't have peak velocity in the
-		# range 25%...75%
 
 	def next(self):
 		if self.exhausted:
